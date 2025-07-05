@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Building, Phone, Play } from 'lucide-react';
+import { User, Building, Phone, Play, Mail } from 'lucide-react';
 import { Player } from '../types/game';
 import { savePlayer, getPlayerByMobile } from '../utils/storage';
 
@@ -11,10 +11,23 @@ export const PlayerRegistration: React.FC<PlayerRegistrationProps> = ({ onPlayer
   const [formData, setFormData] = useState({
     name: '',
     company: '',
-    mobile: ''
+    mobile: '',
+    email: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  const validateSingaporeMobile = (mobile: string): boolean => {
+    // Singapore mobile numbers: +65 followed by 8 or 9 and 7 more digits
+    // Formats: +6581234567, +6591234567, 81234567, 91234567
+    const sgMobileRegex = /^(\+65)?[89]\d{7}$/;
+    return sgMobileRegex.test(mobile.replace(/\s/g, ''));
+  };
+
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -29,10 +42,16 @@ export const PlayerRegistration: React.FC<PlayerRegistrationProps> = ({ onPlayer
       newErrors.company = 'Company is required';
     }
 
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(formData.email.trim())) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
     if (!formData.mobile.trim()) {
       newErrors.mobile = 'Mobile number is required';
-    } else if (!/^\+?[\d\s\-\(\)]{10,15}$/.test(formData.mobile.trim())) {
-      newErrors.mobile = 'Please enter a valid mobile number';
+    } else if (!validateSingaporeMobile(formData.mobile.trim())) {
+      newErrors.mobile = 'Please enter a valid Singapore mobile number (e.g., +6581234567 or 81234567)';
     }
 
     setErrors(newErrors);
@@ -47,14 +66,21 @@ export const PlayerRegistration: React.FC<PlayerRegistrationProps> = ({ onPlayer
     setIsLoading(true);
 
     try {
+      // Normalize mobile number format
+      let normalizedMobile = formData.mobile.trim().replace(/\s/g, '');
+      if (!normalizedMobile.startsWith('+65')) {
+        normalizedMobile = '+65' + normalizedMobile;
+      }
+
       // Check if player exists
-      const existingPlayer = getPlayerByMobile(formData.mobile.trim());
+      const existingPlayer = getPlayerByMobile(normalizedMobile);
       
       const player: Player = {
         id: existingPlayer?.id || Date.now().toString(),
         name: formData.name.trim(),
         company: formData.company.trim(),
-        mobile: formData.mobile.trim(),
+        mobile: normalizedMobile,
+        email: formData.email.trim().toLowerCase(),
         timestamp: Date.now()
       };
 
@@ -130,8 +156,27 @@ export const PlayerRegistration: React.FC<PlayerRegistrationProps> = ({ onPlayer
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
+              <Mail size={16} className="inline mr-2" />
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                errors.email ? 'border-red-500' : 'border-slate-300'
+              }`}
+              placeholder="Enter your email address"
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               <Phone size={16} className="inline mr-2" />
-              Mobile Number
+              Singapore Mobile Number
             </label>
             <input
               type="tel"
@@ -140,11 +185,14 @@ export const PlayerRegistration: React.FC<PlayerRegistrationProps> = ({ onPlayer
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                 errors.mobile ? 'border-red-500' : 'border-slate-300'
               }`}
-              placeholder="Enter your mobile number"
+              placeholder="+6581234567 or 81234567"
             />
             {errors.mobile && (
               <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>
             )}
+            <p className="text-xs text-slate-500 mt-1">
+              Singapore mobile numbers only (starting with 8 or 9)
+            </p>
           </div>
 
           <button

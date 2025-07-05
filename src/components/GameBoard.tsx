@@ -172,6 +172,11 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
     return 'text-red-600';
   };
 
+  const handleNewGame = () => {
+    // Redirect to login page for new game
+    onBackToRegistration();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
       <div className="max-w-6xl mx-auto">
@@ -262,7 +267,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
               
               <div className="flex gap-3">
                 <button
-                  onClick={initializeGame}
+                  onClick={handleNewGame}
                   className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium"
                 >
                   New Game
@@ -293,7 +298,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
           
           {gameStarted && (
             <button
-              onClick={initializeGame}
+              onClick={handleNewGame}
               className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center gap-2 font-medium"
             >
               <RotateCcw size={20} />

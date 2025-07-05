@@ -3,6 +3,7 @@ export interface Player {
   name: string;
   company: string;
   mobile: string;
+  email: string;
   timestamp: number;
 }
 
@@ -29,5 +30,5 @@ export interface GameCard {
   service: ClouderaService;
   type: 'name' | 'description';
   isFlipped: boolean;
-  isMatched: boolean;
+  isMatched: false;
 }
