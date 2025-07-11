@@ -65,8 +65,6 @@ The built files will be in the `dist` directory.
 ### Registration
 1. Enter your **full name**
 2. Provide your **company name**
-3. Enter a **valid email address**
-4. Add your **Singapore mobile number** (required format: +6581234567 or 81234567)
 
 ### Gameplay
 1. **Start the Game**: Click "Start Game" to begin the 60-second challenge

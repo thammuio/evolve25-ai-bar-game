@@ -2,8 +2,6 @@ export interface Player {
   id: string;
   name: string;
   company: string;
-  mobile: string;
-  email: string;
   timestamp: number;
 }
 

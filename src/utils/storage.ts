@@ -5,7 +5,7 @@ const SCORES_KEY = 'cloudera-game-scores';
 
 export const savePlayer = (player: Player): void => {
   const players = getPlayers();
-  const existingIndex = players.findIndex(p => p.mobile === player.mobile);
+  const existingIndex = players.findIndex(p => p.name === player.name);
   
   if (existingIndex >= 0) {
     players[existingIndex] = player;
@@ -21,9 +21,9 @@ export const getPlayers = (): Player[] => {
   return stored ? JSON.parse(stored) : [];
 };
 
-export const getPlayerByMobile = (mobile: string): Player | null => {
+export const getPlayerByName = (name: string): Player | null => {
   const players = getPlayers();
-  return players.find(p => p.mobile === mobile) || null;
+  return players.find(p => p.name === name) || null;
 };
 
 export const saveGameScore = (score: GameScore): void => {
