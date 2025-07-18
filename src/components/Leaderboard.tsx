@@ -1,7 +1,8 @@
 import React from 'react';
-import { Trophy, Medal, Award, Clock, Target, User, Building } from 'lucide-react';
+import { Trophy, Medal, Award, Clock, Target, User, Building, Download } from 'lucide-react';
 import { GameScore } from '../types/game';
 import { getScoreRating } from '../utils/scoring';
+import { exportLeaderboardToCSV } from '../utils/csvExport';
 
 interface LeaderboardProps {
   scores: GameScore[];
@@ -24,6 +25,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ scores, onClose }) => 
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleExportCSV = () => {
+    exportLeaderboardToCSV(scores);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
@@ -31,18 +36,31 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ scores, onClose }) => 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Trophy size={28} />
-              <h2 className="text-2xl font-bold">Leaderboard</h2>
+              <div>
+                <h2 className="text-2xl font-bold">Leaderboard</h2>
+                <p className="text-blue-100 text-sm">Top performers in the Cloudera Memory Challenge</p>
+              </div>
             </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-gray-200 transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-3">
+              {scores.length > 0 && (
+                <button
+                  onClick={handleExportCSV}
+                  className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+                >
+                  <Download size={16} />
+                  Export CSV
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="text-white hover:text-gray-200 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
-          <p className="text-blue-100 mt-2">Top performers in the Cloudera Memory Challenge</p>
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">

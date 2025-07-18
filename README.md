@@ -23,6 +23,7 @@ The Cloudera Memory Challenge is an engaging memory game where players match Clo
 - **📱 Responsive Design**: Works perfectly on all devices
 - **🎨 Beautiful UI**: Modern, production-ready interface
 - **💾 Local Storage**: Persistent player data and scores
+- **📊 CSV Export**: Export leaderboard and player data to CSV files
 
 ## 🚀 Getting Started
 
@@ -142,6 +143,7 @@ src/
 - **Accessibility** - Proper contrast ratios and readable fonts
 - **Loading States** - Visual feedback during actions
 - **Error Handling** - Clear validation messages
+- **Data Export** - CSV export functionality for data analysis
 
 ## 🏗️ Architecture
 
@@ -156,6 +158,30 @@ src/
 2. **Game State** → React State Management
 3. **Score Calculation** → Utility Functions
 4. **Leaderboard** → Local Storage + Sorting
+5. **Data Export** → CSV Generation + Download
+
+## 📊 Data Export Features
+
+The application includes comprehensive CSV export functionality:
+
+### Export Options
+- **Leaderboard Data** - Complete game scores with player details
+- **Player Data** - Registration information and timestamps  
+- **Complete Dataset** - Combined player stats and game analytics
+
+### CSV Data Fields
+
+**Leaderboard Export:**
+- Rank, Player Name, Company, Score
+- Matched Pairs, Tiles Revealed, Time Remaining
+- Game Completion Status, Game Date, Registration Date
+
+**Player Export:**
+- Name, Company, Registration Date
+
+**Complete Data Export:**
+- Player analytics including total games, best/average scores
+- Game completion statistics and activity tracking
 
 ## 🔧 Configuration
 

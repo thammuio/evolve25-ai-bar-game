@@ -4,9 +4,10 @@ import { clouderaServices } from '../data/clouderaServices';
 import { GameTile } from './GameTile';
 import { Leaderboard } from './Leaderboard';
 import { Credits } from './Credits';
-import { Shuffle, RotateCcw, Trophy, Timer, Target, User, Award, Info } from 'lucide-react';
+import { Shuffle, RotateCcw, Trophy, Timer, Target, User, Award, Info, Download } from 'lucide-react';
 import { calculateScore, getScoreRating, sortLeaderboard } from '../utils/scoring';
-import { saveGameScore, getGameScores } from '../utils/storage';
+import { saveGameScore, getGameScores, getPlayers } from '../utils/storage';
+import { exportLeaderboardToCSV, exportPlayersToCSV, exportAllDataToCSV } from '../utils/csvExport';
 
 interface GameBoardProps {
   player: Player;
@@ -25,6 +26,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showCredits, setShowCredits] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   const initializeGame = () => {
     const gameCards: GameCard[] = [];
@@ -177,6 +179,25 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
     onBackToRegistration();
   };
 
+  const handleExportLeaderboard = () => {
+    const scores = getLeaderboardScores();
+    exportLeaderboardToCSV(scores);
+    setShowExportMenu(false);
+  };
+
+  const handleExportPlayers = () => {
+    const players = getPlayers();
+    exportPlayersToCSV(players);
+    setShowExportMenu(false);
+  };
+
+  const handleExportAllData = () => {
+    const players = getPlayers();
+    const scores = getLeaderboardScores();
+    exportAllDataToCSV(players, scores);
+    setShowExportMenu(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
       <div className="max-w-6xl mx-auto">
@@ -322,6 +343,42 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
             Credits
           </button>
           
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-6 py-3 rounded-lg hover:from-teal-700 hover:to-cyan-700 transition-all duration-200 flex items-center gap-2 font-medium"
+            >
+              <Download size={20} />
+              Export Data
+            </button>
+            
+            {showExportMenu && (
+              <div className="absolute top-full mt-2 right-0 bg-white rounded-lg shadow-lg border border-slate-200 py-2 min-w-48 z-10">
+                <button
+                  onClick={handleExportLeaderboard}
+                  className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 flex items-center gap-2"
+                >
+                  <Trophy size={16} />
+                  Export Leaderboard
+                </button>
+                <button
+                  onClick={handleExportPlayers}
+                  className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 flex items-center gap-2"
+                >
+                  <User size={16} />
+                  Export Players
+                </button>
+                <button
+                  onClick={handleExportAllData}
+                  className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 flex items-center gap-2"
+                >
+                  <Download size={16} />
+                  Export All Data
+                </button>
+              </div>
+            )}
+          </div>
+          
           <button
             onClick={onBackToRegistration}
             className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-6 py-3 rounded-lg hover:from-slate-700 hover:to-slate-800 transition-all duration-200 font-medium"
@@ -383,6 +440,14 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
         {/* Credits Modal */}
         {showCredits && (
           <Credits onClose={() => setShowCredits(false)} />
+        )}
+
+        {/* Click outside to close export menu */}
+        {showExportMenu && (
+          <div 
+            className="fixed inset-0 z-5" 
+            onClick={() => setShowExportMenu(false)}
+          />
         )}
       </div>
     </div>
