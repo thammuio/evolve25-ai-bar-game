@@ -1,15 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trophy, Medal, Award, Clock, Target, User, Building, Download } from 'lucide-react';
 import { GameScore } from '../types/game';
-import { getScoreRating } from '../utils/scoring';
+import { getScoreRating, sortLeaderboard } from '../utils/scoring';
+import { getGameScores } from '../utils/database';
 import { exportLeaderboardToCSV } from '../utils/csvExport';
 
 interface LeaderboardProps {
-  scores: GameScore[];
   onClose: () => void;
 }
 
-export const Leaderboard: React.FC<LeaderboardProps> = ({ scores, onClose }) => {
+export const Leaderboard: React.FC<LeaderboardProps> = ({ onClose }) => {
+  const [scores, setScores] = useState<GameScore[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchScores = async () => {
+      try {
+        setIsLoading(true);
+        const gameScores = await getGameScores();
+        setScores(sortLeaderboard(gameScores));
+      } catch (err) {
+        console.error('Error fetching scores:', err);
+        setError('Failed to load leaderboard data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchScores();
+  }, []);
+
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1: return <Trophy className="text-yellow-500" size={20} />;
@@ -64,7 +85,18 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ scores, onClose }) => 
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          {scores.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-500 text-lg">Loading leaderboard...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <Trophy className="text-red-300 mx-auto mb-4" size={48} />
+              <p className="text-red-500 text-lg">Error loading leaderboard</p>
+              <p className="text-gray-400">{error}</p>
+            </div>
+          ) : scores.length === 0 ? (
             <div className="text-center py-12">
               <Trophy className="text-gray-300 mx-auto mb-4" size={48} />
               <p className="text-gray-500 text-lg">No scores yet!</p>

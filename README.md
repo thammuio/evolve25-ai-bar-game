@@ -11,6 +11,7 @@ A beautiful, interactive memory game featuring Cloudera's comprehensive data pla
 
 **Play the game:** [https://cdp-memory-game.netlify.app](https://cdp-memory-game.netlify.app)
 
+> **Note:** The leaderboard is now globally accessible! Your scores will be visible to all players worldwide.
 ## 🎯 Game Overview
 
 The Cloudera Memory Challenge is an engaging memory game where players match Cloudera service names with their descriptions. It's designed to help data professionals learn about Cloudera's ecosystem while having fun!
@@ -19,7 +20,8 @@ The Cloudera Memory Challenge is an engaging memory game where players match Clo
 
 - **🕐 Time Challenge**: Complete all matches within 60 seconds
 - **🏆 Scoring System**: Comprehensive scoring based on performance
-- **📊 Leaderboard**: Compete with other players
+- **🌍 Global Leaderboard**: Compete with players worldwide
+- **☁️ Cloud Database**: Persistent data storage with Supabase
 - **📱 Responsive Design**: Works perfectly on all devices
 - **🎨 Beautiful UI**: Modern, production-ready interface
 - **💾 Local Storage**: Persistent player data and scores
@@ -29,8 +31,9 @@ The Cloudera Memory Challenge is an engaging memory game where players match Clo
 
 ### Prerequisites
 
-- Node.js (version 18 or higher)
-- npm or yarn package manager
+- **Node.js** (version 18 or higher)
+- **npm** or yarn package manager
+- **Supabase Account** (for database functionality)
 
 ### Installation
 
@@ -40,18 +43,66 @@ The Cloudera Memory Challenge is an engaging memory game where players match Clo
    cd cloudera-memory-challenge
    ```
 
-2. **Install dependencies**
+2. **Set up Supabase**
+   - Create a new project at [supabase.com](https://supabase.com)
+   - Copy your project URL and anon key
+   - Create a `.env` file based on `.env.example`
+   - Add your Supabase credentials
+
+3. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. **Start the development server**
+4. **Set up the database**
+   The database tables will be created automatically when you first run the application.
+
+5. **Start the development server**
    ```bash
    npm run dev
    ```
 
-4. **Open your browser**
+6. **Open your browser**
    Navigate to `http://localhost:5173` to play the game
+
+### Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### Database Setup
+
+The application uses Supabase PostgreSQL database with the following tables:
+
+#### **Players Table**
+```sql
+CREATE TABLE players (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  company text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+```
+
+#### **Game Scores Table**
+```sql
+CREATE TABLE game_scores (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  player_id uuid NOT NULL REFERENCES players(id),
+  player_name text NOT NULL,
+  player_company text NOT NULL,
+  score integer NOT NULL DEFAULT 0,
+  tiles_revealed integer NOT NULL DEFAULT 0,
+  matched_pairs integer NOT NULL DEFAULT 0,
+  time_remaining integer NOT NULL DEFAULT 0,
+  completed_game boolean NOT NULL DEFAULT false,
+  created_at timestamptz DEFAULT now()
+);
+```
 
 ### Build for Production
 
@@ -97,6 +148,7 @@ The built files will be in the `dist` directory.
 ### Frontend
 - **React 18.3.1** - Modern React with hooks
 - **TypeScript 5.5.3** - Type-safe development
+- **Supabase** - Backend-as-a-Service for database and real-time features
 - **Tailwind CSS 3.4.1** - Utility-first CSS framework
 - **Lucide React** - Beautiful, customizable icons
 - **Vite 5.4.2** - Fast build tool and dev server
@@ -106,6 +158,10 @@ The built files will be in the `dist` directory.
 - **PostCSS** - CSS processing
 - **Autoprefixer** - CSS vendor prefixing
 
+### Database & Backend
+- **Supabase** - PostgreSQL database with real-time subscriptions
+- **Row Level Security** - Secure data access policies
+- **Auto-generated APIs** - RESTful and real-time APIs
 ## 📁 Project Structure
 
 ```
@@ -116,15 +172,22 @@ src/
 │   ├── PlayerRegistration.tsx  # Player signup form
 │   ├── Leaderboard.tsx  # Score rankings
 │   └── Credits.tsx      # Game credits
+├── lib/
+│   └── supabase.ts      # Supabase client configuration
 ├── data/
 │   └── clouderaServices.ts  # Cloudera services data
 ├── types/
 │   └── game.ts          # TypeScript type definitions
 ├── utils/
+│   ├── database.ts      # Database operations
 │   ├── scoring.ts       # Score calculation logic
-│   └── storage.ts       # Local storage utilities
+│   ├── storage.ts       # Local storage utilities (legacy)
+│   └── csvExport.ts     # CSV export functionality
+├── supabase/
+│   └── migrations/      # Database migration files
 ├── App.tsx              # Main application component
 ├── main.tsx            # Application entry point
+├── .env.example         # Environment variables template
 └── index.css           # Global styles
 ```
 
@@ -154,12 +217,18 @@ src/
 - **Event Handling** - Proper event delegation and handling
 
 ### Data Flow
-1. **Player Registration** → Local Storage
+1. **Player Registration** → Supabase Database
 2. **Game State** → React State Management
 3. **Score Calculation** → Utility Functions
-4. **Leaderboard** → Local Storage + Sorting
+4. **Leaderboard** → Supabase Database + Real-time Updates
 5. **Data Export** → CSV Generation + Download
 
+### Database Architecture
+- **Global Accessibility** - Data stored in cloud database
+- **Real-time Updates** - Leaderboard updates automatically
+- **Scalable Storage** - No browser storage limitations
+- **Data Persistence** - Survives browser clearing and device changes
+- **Cross-device Sync** - Access your data from any device
 ## 📊 Data Export Features
 
 The application includes comprehensive CSV export functionality:
@@ -252,11 +321,13 @@ The game features 8 core Cloudera services across different categories:
 
 ## 🚀 Deployment
 
-The application is deployed on Netlify with automatic builds from the main branch.
+The application is deployed on Netlify with Supabase as the backend database.
 
 ### Deployment URL
 **Production:** [https://cdp-memory-game.netlify.app](https://cdp-memory-game.netlify.app)
 
+### Database
+**Backend:** Supabase PostgreSQL with global accessibility
 ### Build Configuration
 ```json
 {

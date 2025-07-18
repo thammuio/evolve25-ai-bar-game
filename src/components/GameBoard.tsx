@@ -6,7 +6,7 @@ import { Leaderboard } from './Leaderboard';
 import { Credits } from './Credits';
 import { Shuffle, RotateCcw, Trophy, Timer, Target, User, Award, Info, Download } from 'lucide-react';
 import { calculateScore, getScoreRating, sortLeaderboard } from '../utils/scoring';
-import { saveGameScore, getGameScores, getPlayers } from '../utils/storage';
+import { saveGameScore, getGameScores, getPlayers } from '../utils/database';
 import { exportLeaderboardToCSV, exportPlayersToCSV, exportAllDataToCSV } from '../utils/csvExport';
 
 interface GameBoardProps {
@@ -27,6 +27,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
   const [showCredits, setShowCredits] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [isLoadingScores, setIsLoadingScores] = useState(false);
 
   const initializeGame = () => {
     const gameCards: GameCard[] = [];
@@ -118,6 +119,38 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
   // Save score when game ends
   useEffect(() => {
     if ((gameComplete || gameOver) && gameStarted) {
+      const saveScore = async () => {
+        try {
+          const score = calculateScore(
+            matchedPairs.length,
+            tilesRevealed,
+            timeRemaining,
+            clouderaServices.length,
+            gameComplete
+          );
+          
+          setFinalScore(score);
+
+          await saveGameScore({
+            player,
+            score,
+            tilesRevealed,
+            matchedPairs: matchedPairs.length,
+            timeRemaining,
+            completedGame: gameComplete
+          });
+        } catch (error) {
+          console.error('Error saving game score:', error);
+        }
+      };
+
+      saveScore();
+    }
+  }, [gameComplete, gameOver, gameStarted, matchedPairs.length, tilesRevealed, timeRemaining, player]);
+
+  const getLeaderboardScores = async () => {
+    setIsLoadingScores(true);
+    try {
       const score = calculateScore(
         matchedPairs.length,
         tilesRevealed,
@@ -125,23 +158,15 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
         clouderaServices.length,
         gameComplete
       );
-      
-      setFinalScore(score);
-
-      const gameScore: GameScore = {
-        id: Date.now().toString(),
-        player,
-        score,
-        tilesRevealed,
-        matchedPairs: matchedPairs.length,
-        timeRemaining,
-        completedGame: gameComplete,
-        gameDate: new Date().toISOString()
-      };
-
-      saveGameScore(gameScore);
+      const scores = await getGameScores();
+      return sortLeaderboard(scores);
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+      return [];
+    } finally {
+      setIsLoadingScores(false);
     }
-  }, [gameComplete, gameOver, gameStarted, matchedPairs.length, tilesRevealed, timeRemaining, player]);
+  };
 
   const handleCardClick = (clickedCard: GameCard) => {
     if (flippedCards.length >= 2 || clickedCard.isFlipped || clickedCard.isMatched || gameOver || gameComplete) {
@@ -164,9 +189,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getLeaderboardScores = () => {
-    return sortLeaderboard(getGameScores());
-  };
 
   const getTimeColor = () => {
     if (timeRemaining > 30) return 'text-green-600';
@@ -180,22 +202,24 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
   };
 
   const handleExportLeaderboard = () => {
-    const scores = getLeaderboardScores();
-    exportLeaderboardToCSV(scores);
-    setShowExportMenu(false);
+    getLeaderboardScores().then(scores => {
+      exportLeaderboardToCSV(scores);
+      setShowExportMenu(false);
+    });
   };
 
   const handleExportPlayers = () => {
-    const players = getPlayers();
-    exportPlayersToCSV(players);
-    setShowExportMenu(false);
+    getPlayers().then(players => {
+      exportPlayersToCSV(players);
+      setShowExportMenu(false);
+    });
   };
 
   const handleExportAllData = () => {
-    const players = getPlayers();
-    const scores = getLeaderboardScores();
-    exportAllDataToCSV(players, scores);
-    setShowExportMenu(false);
+    Promise.all([getPlayers(), getLeaderboardScores()]).then(([players, scores]) => {
+      exportAllDataToCSV(players, scores);
+      setShowExportMenu(false);
+    });
   };
 
   return (
@@ -294,7 +318,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
                   New Game
                 </button>
                 <button
-                  onClick={() => setShowLeaderboard(true)}
+                  onClick={async () => {
+                    const scores = await getLeaderboardScores();
+                    setShowLeaderboard(true);
+                  }}
                   className="flex-1 bg-gradient-to-r from-green-600 to-teal-600 text-white px-4 py-3 rounded-lg hover:from-green-700 hover:to-teal-700 transition-all duration-200 font-medium flex items-center justify-center gap-2"
                 >
                   <Award size={16} />
@@ -328,11 +355,19 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
           )}
           
           <button
-            onClick={() => setShowLeaderboard(true)}
+            onClick={async () => {
+              const scores = await getLeaderboardScores();
+              setShowLeaderboard(true);
+            }}
             className="bg-gradient-to-r from-yellow-600 to-orange-600 text-white px-6 py-3 rounded-lg hover:from-yellow-700 hover:to-orange-700 transition-all duration-200 flex items-center gap-2 font-medium"
+            disabled={isLoadingScores}
           >
-            <Award size={20} />
-            Leaderboard
+            {isLoadingScores ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Award size={20} />
+            )}
+            {isLoadingScores ? 'Loading...' : 'Leaderboard'}
           </button>
           
           <button
@@ -432,7 +467,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
         {/* Leaderboard Modal */}
         {showLeaderboard && (
           <Leaderboard
-            scores={getLeaderboardScores()}
+            scores={[]} // Will be loaded inside the component
             onClose={() => setShowLeaderboard(false)}
           />
         )}

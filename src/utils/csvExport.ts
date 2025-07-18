@@ -1,10 +1,11 @@
 import { Player, GameScore } from '../types/game';
 
-export const exportPlayersToCSV = (players: Player[]): void => {
+export const exportPlayersToCSV = async (players: Player[] | Promise<Player[]>): Promise<void> => {
+  const resolvedPlayers = await Promise.resolve(players);
   const headers = ['Name', 'Company', 'Registration Date'];
   const csvContent = [
     headers.join(','),
-    ...players.map(player => [
+    ...resolvedPlayers.map(player => [
       `"${player.name}"`,
       `"${player.company}"`,
       `"${new Date(player.timestamp).toLocaleString()}"`
@@ -14,7 +15,8 @@ export const exportPlayersToCSV = (players: Player[]): void => {
   downloadCSV(csvContent, 'players-data.csv');
 };
 
-export const exportLeaderboardToCSV = (scores: GameScore[]): void => {
+export const exportLeaderboardToCSV = async (scores: GameScore[] | Promise<GameScore[]>): Promise<void> => {
+  const resolvedScores = await Promise.resolve(scores);
   const headers = [
     'Rank',
     'Player Name', 
@@ -30,7 +32,7 @@ export const exportLeaderboardToCSV = (scores: GameScore[]): void => {
   
   const csvContent = [
     headers.join(','),
-    ...scores.map((score, index) => [
+    ...resolvedScores.map((score, index) => [
       index + 1,
       `"${score.player.name}"`,
       `"${score.player.company}"`,
@@ -47,7 +49,15 @@ export const exportLeaderboardToCSV = (scores: GameScore[]): void => {
   downloadCSV(csvContent, 'leaderboard-data.csv');
 };
 
-export const exportAllDataToCSV = (players: Player[], scores: GameScore[]): void => {
+export const exportAllDataToCSV = async (
+  players: Player[] | Promise<Player[]>, 
+  scores: GameScore[] | Promise<GameScore[]>
+): Promise<void> => {
+  const [resolvedPlayers, resolvedScores] = await Promise.all([
+    Promise.resolve(players),
+    Promise.resolve(scores)
+  ]);
+  
   // Create a comprehensive dataset combining player and score data
   const headers = [
     'Player Name',
@@ -60,8 +70,8 @@ export const exportAllDataToCSV = (players: Player[], scores: GameScore[]): void
     'Last Game Date'
   ];
 
-  const playerStats = players.map(player => {
-    const playerScores = scores.filter(score => score.player.name === player.name);
+  const playerStats = resolvedPlayers.map(player => {
+    const playerScores = resolvedScores.filter(score => score.player.name === player.name);
     const completedGames = playerScores.filter(score => score.completedGame).length;
     const bestScore = playerScores.length > 0 ? Math.max(...playerScores.map(s => s.score)) : 0;
     const avgScore = playerScores.length > 0 ? 

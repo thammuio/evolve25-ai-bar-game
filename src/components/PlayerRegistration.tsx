@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, Building, Play } from 'lucide-react';
 import { Player } from '../types/game';
-import { savePlayer, getPlayerByName } from '../utils/storage';
+import { savePlayer, getPlayerByName } from '../utils/database';
 
 interface PlayerRegistrationProps {
   onPlayerReady: (player: Player) => void;
@@ -40,20 +40,17 @@ export const PlayerRegistration: React.FC<PlayerRegistrationProps> = ({ onPlayer
     setIsLoading(true);
 
     try {
-      // Check if player exists by name
-      const existingPlayer = getPlayerByName(formData.name.trim());
-      
-      const player: Player = {
-        id: existingPlayer?.id || Date.now().toString(),
+      // Save player to database
+      const player = await savePlayer({
         name: formData.name.trim(),
-        company: formData.company.trim(),
-        timestamp: Date.now()
-      };
+        company: formData.company.trim()
+      });
 
-      savePlayer(player);
       onPlayerReady(player);
     } catch (error) {
       console.error('Error saving player:', error);
+      // Show error message to user
+      setErrors({ general: 'Failed to save player data. Please try again.' });
     } finally {
       setIsLoading(false);
     }
@@ -119,6 +116,12 @@ export const PlayerRegistration: React.FC<PlayerRegistrationProps> = ({ onPlayer
               <p className="text-red-500 text-sm mt-1">{errors.company}</p>
             )}
           </div>
+
+          {errors.general && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-red-600 text-sm">{errors.general}</p>
+            </div>
+          )}
 
           <button
             type="submit"
