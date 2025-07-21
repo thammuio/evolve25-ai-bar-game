@@ -18,7 +18,7 @@ The Cloudera Memory Challenge is an engaging memory game where players match Clo
 
 ### 🎲 Game Features
 
-- **🕐 Time Challenge**: Complete all matches within 60 seconds
+- **🕐 Time Challenge**: Complete all matches within 90 seconds
 - **🏆 Scoring System**: Comprehensive scoring based on performance
 - **🌍 Global Leaderboard**: Compete with players worldwide
 - **☁️ Cloud Database**: Persistent data storage with Supabase
@@ -122,7 +122,7 @@ The built files will be in the `dist` directory.
 1. **Start the Game**: Click "Start Game" to begin the 60-second challenge
 2. **Flip Tiles**: Click on tiles to reveal Cloudera service names and descriptions
 3. **Make Matches**: Match each service name with its corresponding description
-4. **Beat the Clock**: Complete all 8 matches within 60 seconds for maximum points
+4. **Beat the Clock**: Complete all 8 matches within 90 seconds for maximum points
 5. **Check Leaderboard**: See how you rank against other players
 
 ### Scoring System

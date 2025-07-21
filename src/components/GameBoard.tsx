@@ -21,7 +21,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
   const [tilesRevealed, setTilesRevealed] = useState(0);
   const [gameComplete, setGameComplete] = useState(false);
   const [gameOver, setGameOver] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(60); // 1 minute
+  const [timeRemaining, setTimeRemaining] = useState(90); // 90 seconds
   const [gameStarted, setGameStarted] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showCredits, setShowCredits] = useState(false);
@@ -57,7 +57,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
     setTilesRevealed(0);
     setGameComplete(false);
     setGameOver(false);
-    setTimeRemaining(60); // 1 minute
+    setTimeRemaining(90); // 90 seconds
     setGameStarted(true);
     setFinalScore(0);
   };

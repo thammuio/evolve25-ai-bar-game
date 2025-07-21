@@ -18,25 +18,23 @@ export const GameTile: React.FC<GameTileProps> = ({
   type,
   disabled
 }) => {
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'Core Platform': return 'from-blue-500 to-blue-600';
-      case 'Analytics': return 'from-purple-500 to-purple-600';
-      case 'Data Streaming': return 'from-green-500 to-green-600';
-      case 'Database': return 'from-orange-500 to-orange-600';
-      case 'Data Warehouse': return 'from-teal-500 to-teal-600';
-      case 'ML/AI': return 'from-pink-500 to-pink-600';
-      case 'Storage': return 'from-indigo-500 to-indigo-600';
-      default: return 'from-gray-500 to-gray-600';
-    }
+  const getRandomColor = () => {
+    const colors = [
+      'from-blue-500 to-blue-600',
+      'from-orange-500 to-red-500',
+    ];
+    return colors[1];
+  };
+
+  const getClouderaColor = () => {
+    return 'from-orange-500 to-red-500';
   };
 
   return (
     <div
       className={`
-        relative w-full h-32 cursor-pointer transition-all duration-300 transform hover:scale-105
-        ${disabled ? 'cursor-not-allowed opacity-50' : ''}
-        ${isMatched ? 'opacity-75' : ''}
+        relative w-full h-32 cursor-pointer
+        ${isMatched ? '' : ''}
       `}
       onClick={!disabled ? onClick : undefined}
     >
@@ -55,7 +53,7 @@ export const GameTile: React.FC<GameTileProps> = ({
           `}
         >
           <div className="text-center">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-2"></div>
+            <div className="w-8 h-8 bg-gradient-to-br from-slate-400 to-slate-500 rounded-full mx-auto mb-2"></div>
             <p className="text-sm font-medium text-slate-600">Click to reveal</p>
           </div>
         </div>
@@ -63,7 +61,7 @@ export const GameTile: React.FC<GameTileProps> = ({
         {/* Back face (content) */}
         <div
           className={`
-            absolute inset-0 w-full h-full bg-gradient-to-br ${getCategoryColor(service.category)}
+            absolute inset-0 w-full h-full bg-gradient-to-br ${isMatched ? getClouderaColor() : getRandomColor()}
             rounded-lg shadow-lg border-2 border-white/20 backface-hidden rotate-y-180
             flex flex-col items-center justify-center p-4 text-white
             ${isMatched ? 'ring-4 ring-yellow-400 ring-opacity-50' : ''}

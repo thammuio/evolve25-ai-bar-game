@@ -67,7 +67,7 @@ export const PlayerRegistration: React.FC<PlayerRegistrationProps> = ({ onPlayer
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <Play className="text-white" size={24} />
           </div>
           <h1 className="text-2xl font-bold text-slate-800 mb-2">
@@ -141,7 +141,7 @@ export const PlayerRegistration: React.FC<PlayerRegistrationProps> = ({ onPlayer
 
         <div className="mt-6 text-center text-sm text-slate-500">
           <p>🎯 Match service names with descriptions</p>
-          <p>⏱️ Complete within 1 minute for bonus points</p>
+          <p>⏱️ Complete within 90 seconds for bonus points</p>
           <p>🏆 Compete on the leaderboard</p>
         </div>
       </div>

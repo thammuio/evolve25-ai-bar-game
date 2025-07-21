@@ -17,8 +17,8 @@ export const calculateScore = (
     score += 200;
   }
   
-  // Time bonus (up to 100 points based on time remaining out of 60 seconds)
-  const timeBonus = Math.floor((timeRemaining / 60) * 100);
+  // Time bonus (up to 100 points based on time remaining out of 90 seconds)
+  const timeBonus = Math.floor((timeRemaining / 90) * 100);
   score += timeBonus;
   
   // Efficiency bonus (fewer tiles revealed is better)
