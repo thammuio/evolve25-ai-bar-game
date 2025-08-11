@@ -1,35 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Medal, Award, Clock, Target, User, Building, Download } from 'lucide-react';
+import { Trophy, Medal, Award, Clock, Target, User, Building, Download, Trash2 } from 'lucide-react';
 import { GameScore } from '../types/game';
 import { getScoreRating, sortLeaderboard } from '../utils/scoring';
-import { getGameScores } from '../utils/database';
+import { getCurrentSessionScores, getDailyScores, clearCurrentSession } from '../utils/database';
 import { exportLeaderboardToCSV } from '../utils/csvExport';
+import { WinnerPopup } from './WinnerPopup';
 
 interface LeaderboardProps {
   onClose: () => void;
 }
 
 export const Leaderboard: React.FC<LeaderboardProps> = ({ onClose }) => {
-  const [scores, setScores] = useState<GameScore[]>([]);
+  const [sessionScores, setSessionScores] = useState<GameScore[]>([]);
+  const [dailyScores, setDailyScores] = useState<GameScore[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'session' | 'daily'>('session');
+  const [showWinnerPopup, setShowWinnerPopup] = useState(false);
+  const [winners, setWinners] = useState<GameScore[]>([]);
 
   useEffect(() => {
-    const fetchScores = async () => {
-      try {
-        setIsLoading(true);
-        const gameScores = await getGameScores();
-        setScores(sortLeaderboard(gameScores));
-      } catch (err) {
-        console.error('Error fetching scores:', err);
-        setError('Failed to load leaderboard data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
     fetchScores();
   }, []);
+
+  const fetchScores = async () => {
+    try {
+      setIsLoading(true);
+      const [sessionGameScores, dailyGameScores] = await Promise.all([
+        getCurrentSessionScores(),
+        getDailyScores()
+      ]);
+      setSessionScores(sortLeaderboard(sessionGameScores));
+      setDailyScores(sortLeaderboard(dailyGameScores));
+    } catch (err) {
+      console.error('Error fetching scores:', err);
+      setError('Failed to load leaderboard data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClearSession = () => {
+    if (sessionScores.length === 0) return;
+    
+    // Show top 3 winners before clearing
+    const top3 = sessionScores.slice(0, 3);
+    setWinners(top3);
+    setShowWinnerPopup(true);
+  };
+
+  const handleWinnerPopupClose = () => {
+    setShowWinnerPopup(false);
+    // Clear the session after showing winners
+    clearCurrentSession();
+    setSessionScores([]);
+    // Refresh scores to start fresh
+    fetchScores();
+  };
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -47,8 +75,12 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ onClose }) => {
   };
 
   const handleExportCSV = () => {
-    exportLeaderboardToCSV(scores);
+    const scoresToExport = activeTab === 'session' ? sessionScores : dailyScores;
+    exportLeaderboardToCSV(scoresToExport);
   };
+
+  const currentScores = activeTab === 'session' ? sessionScores : dailyScores;
+  const top3Session = sessionScores.slice(0, 3);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -58,12 +90,28 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ onClose }) => {
             <div className="flex items-center gap-3">
               <Trophy size={28} />
               <div>
-                <h2 className="text-2xl font-bold">Leaderboard</h2>
-                <p className="text-blue-100 text-sm">Top performers in the Cloudera Memory Challenge</p>
+                <h2 className="text-2xl font-bold">
+                  Leaderboard
+                </h2>
+                <p className="text-blue-100 text-sm">
+                  {activeTab === 'session' 
+                    ? 'Current session leaderboard'
+                    : 'Today\'s complete leaderboard'
+                  }
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {scores.length > 0 && (
+              {activeTab === 'session' && sessionScores.length > 0 && (
+                <button
+                  onClick={handleClearSession}
+                  className="bg-red-500/20 hover:bg-red-500/30 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+                >
+                  <Trash2 size={16} />
+                  Clear Session
+                </button>
+              )}
+              {currentScores.length > 0 && (
                 <button
                   onClick={handleExportCSV}
                   className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
@@ -85,6 +133,66 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ onClose }) => {
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+          {/* Tab Navigation */}
+          <div className="flex mb-6 bg-slate-100 rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab('session')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'session'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-800'
+              }`}
+            >
+              Current Session
+            </button>
+            <button
+              onClick={() => setActiveTab('daily')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'daily'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-800'
+              }`}
+            >
+              Daily Leaderboard
+            </button>
+          </div>
+
+          {/* Session Top 3 Highlight */}
+          {activeTab === 'session' && top3Session.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <Trophy className="text-yellow-500" size={20} />
+                Current Session Champions
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {top3Session.map((score, index) => {
+                  const rank = index + 1;
+                  const rating = getScoreRating(score.score);
+                  
+                  return (
+                    <div
+                      key={score.id}
+                      className={`
+                        p-4 rounded-xl border-2 text-center
+                        ${rank === 1 ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-yellow-100' : 
+                          rank === 2 ? 'border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100' :
+                          'border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100'}
+                      `}
+                    >
+                      <div className="flex justify-center mb-2">
+                        {getRankIcon(rank)}
+                      </div>
+                      <h4 className="font-bold text-slate-800 mb-1">{score.player.name}</h4>
+                      <p className="text-sm text-slate-600 mb-2">{score.player.company}</p>
+                      <div className="text-2xl font-bold text-slate-800 mb-1">{score.score}</div>
+                      <div className={`text-xs font-medium ${rating.color}`}>{rating.rating}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {isLoading ? (
             <div className="text-center py-12">
               <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -96,15 +204,32 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ onClose }) => {
               <p className="text-red-500 text-lg">Error loading leaderboard</p>
               <p className="text-gray-400">{error}</p>
             </div>
-          ) : scores.length === 0 ? (
+          ) : currentScores.length === 0 ? (
             <div className="text-center py-12">
               <Trophy className="text-gray-300 mx-auto mb-4" size={48} />
-              <p className="text-gray-500 text-lg">No scores yet!</p>
-              <p className="text-gray-400">Be the first to complete the challenge.</p>
+              <p className="text-gray-500 text-lg">
+                {activeTab === 'session' 
+                  ? 'No scores in current session!'
+                  : 'No scores today!'
+                }
+              </p>
+              <p className="text-gray-400">
+                {activeTab === 'session'
+                  ? 'Be the first to play in this session.'
+                  : 'Be the first to play today.'
+                }
+              </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {scores.map((score, index) => {
+            <div>
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">
+                {activeTab === 'session' 
+                  ? 'All Session Scores'
+                  : 'Complete Daily Rankings'
+                }
+              </h3>
+              <div className="space-y-4">
+              {currentScores.map((score, index) => {
                 const rank = index + 1;
                 const rating = getScoreRating(score.score);
                 
@@ -113,9 +238,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ onClose }) => {
                     key={score.id}
                     className={`
                       p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-md
-                      ${rank === 1 ? 'border-yellow-200 bg-yellow-50' : 
+                      ${activeTab === 'session' && rank <= 3 ? 
+                        rank === 1 ? 'border-yellow-200 bg-yellow-50' : 
                         rank === 2 ? 'border-gray-200 bg-gray-50' :
-                        rank === 3 ? 'border-amber-200 bg-amber-50' :
+                        'border-amber-200 bg-amber-50' :
                         'border-slate-200 bg-white'}
                     `}
                   >
@@ -185,9 +311,18 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ onClose }) => {
                   </div>
                 );
               })}
+              </div>
             </div>
           )}
         </div>
+
+        {/* Winner Popup */}
+        {showWinnerPopup && (
+          <WinnerPopup
+            winners={winners}
+            onClose={handleWinnerPopupClose}
+          />
+        )}
       </div>
     </div>
   );

@@ -74,7 +74,7 @@ export const PlayerRegistration: React.FC<PlayerRegistrationProps> = ({ onPlayer
             Cloudera Memory Challenge
           </h1>
           <p className="text-slate-600">
-            Enter your details to start the 1-minute challenge
+            Enter your details to start the 90-Second challenge
           </p>
         </div>
 

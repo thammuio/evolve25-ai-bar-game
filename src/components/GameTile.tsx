@@ -34,6 +34,7 @@ export const GameTile: React.FC<GameTileProps> = ({
     <div
       className={`
         relative w-full h-32 cursor-pointer
+        
         ${isMatched ? '' : ''}
       `}
       onClick={!disabled ? onClick : undefined}

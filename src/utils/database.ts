@@ -9,7 +9,7 @@ export const savePlayer = async (player: Omit<Player, 'id' | 'timestamp'>): Prom
       .from('players')
       .select('*')
       .eq('name', player.name)
-      .single();
+      .maybeSingle();
 
     if (existingPlayer) {
       // Update existing player
@@ -155,6 +155,88 @@ export const getGameScores = async (): Promise<GameScore[]> => {
     }));
   } catch (error) {
     console.error('Error fetching game scores:', error);
+    return [];
+  }
+};
+
+// Get scores for current session (manual tracking)
+export const getCurrentSessionScores = async (): Promise<GameScore[]> => {
+  try {
+    // Get session start time from localStorage or use current session
+    const sessionStart = localStorage.getItem('session-start') || new Date().toISOString();
+    if (!localStorage.getItem('session-start')) {
+      localStorage.setItem('session-start', sessionStart);
+    }
+    
+    const { data, error } = await supabase
+      .from('game_scores')
+      .select('*')
+      .gte('created_at', sessionStart)
+      .order('score', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return data.map(score => ({
+      id: score.id,
+      player: {
+        id: score.player_id,
+        name: score.player_name,
+        company: score.player_company,
+        timestamp: 0
+      },
+      score: score.score,
+      tilesRevealed: score.tiles_revealed,
+      matchedPairs: score.matched_pairs,
+      timeRemaining: score.time_remaining,
+      completedGame: score.completed_game,
+      gameDate: score.created_at
+    }));
+  } catch (error) {
+    console.error('Error fetching current session scores:', error);
+    return [];
+  }
+};
+
+// Clear current session and start new one
+export const clearCurrentSession = (): void => {
+  localStorage.setItem('session-start', new Date().toISOString());
+};
+
+// Get scores for current day
+export const getDailyScores = async (): Promise<GameScore[]> => {
+  try {
+    const now = new Date();
+    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+    
+    const { data, error } = await supabase
+      .from('game_scores')
+      .select('*')
+      .gte('created_at', dayStart.toISOString())
+      .lt('created_at', dayEnd.toISOString())
+      .order('score', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return data.map(score => ({
+      id: score.id,
+      player: {
+        id: score.player_id,
+        name: score.player_name,
+        company: score.player_company,
+        timestamp: 0
+      },
+      score: score.score,
+      tilesRevealed: score.tiles_revealed,
+      matchedPairs: score.matched_pairs,
+      timeRemaining: score.time_remaining,
+      completedGame: score.completed_game,
+      gameDate: score.created_at
+    }));
+  } catch (error) {
+    console.error('Error fetching daily scores:', error);
     return [];
   }
 };
