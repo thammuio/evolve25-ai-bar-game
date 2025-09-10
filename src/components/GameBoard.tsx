@@ -233,14 +233,19 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-4xl font-bold text-slate-800 mb-2">
-            Cloudera Memory Challenge
+          <img 
+            src="src/images/evolve25.png" 
+            alt="EVOLVE25" 
+            className="h-10 object-contain mx-auto mb-4 mt-4"
+          />
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">
+            AI Bar | Memory Match-up
           </h1>
           <div className="flex items-center justify-center gap-2 text-slate-600">
             <User size={16} />
-            <span className="font-medium">{player.name}</span>
+            <span className="font-large">{player.name}</span>
             <span className="text-slate-400">•</span>
-            <span>{player.company}</span>
+            <span className="font-large">{player.company}</span>
           </div>
         </div>
 
@@ -283,7 +288,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
                     Congratulations!
                   </h2>
                   <p className="text-slate-600 mb-4">
-                    You completed the challenge!
+                    You completed the Match-up!
                   </p>
                 </>
               ) : (
