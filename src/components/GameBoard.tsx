@@ -234,7 +234,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
         {/* Header */}
         <div className="text-center mb-6">
           <img 
-            src="src/images/evolve25.png" 
+            src="evolve25.png" 
             alt="EVOLVE25" 
             className="h-10 object-contain mx-auto mb-4 mt-4"
           />

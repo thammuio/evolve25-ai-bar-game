@@ -68,7 +68,7 @@ export const PlayerRegistration: React.FC<PlayerRegistrationProps> = ({ onPlayer
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
             <img 
-            src="src/images/evolve25.png" 
+            src="evolve25.png" 
             alt="EVOLVE25" 
             className="h-10 object-contain mx-auto mb-4"
           />
