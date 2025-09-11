@@ -44,9 +44,9 @@ export const clouderaServices: ClouderaService[] = [
   },
   {
     id: "7",
-    name: "Cloudera AI Platform for Generative AI and Machine Learning at Scale",
-    description: "Develop, deploy, and govern generative AI and predictive ML at scale",
-    category: "AI & ML"
+    name: "Cloudera AI Platform for GenAI and Machine Learning at Scale",
+    description: "Develop, deploy, and govern GenAI and ML at scale with Cloudera AI Platform",
+    category: "Accelerate Enterprise AI"
   },
   {
     id: "8",

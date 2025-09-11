@@ -239,7 +239,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
             className="h-10 object-contain mx-auto mb-4 mt-4"
           />
           <h1 className="text-2xl font-bold text-slate-800 mb-2">
-            AI Bar | Memory Match-up
+            AI Bar | Memory Match-up Game
           </h1>
           <div className="flex items-center justify-center gap-2 text-slate-600">
             <User size={16} />
@@ -473,10 +473,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ player, onBackToRegistrati
             <div>
               <h4 className="font-semibold text-slate-700 mb-2">How to Play:</h4>
               <ul className="text-slate-600 space-y-1 text-sm">
-                <li>• Click tiles to reveal Cloudera service names and descriptions</li>
-                <li>• Match each service name with its description</li>
-                <li>• Complete all matches within 1 minute</li>
-                <li>• Each service has a unique color based on its category</li>
+                <li>• Click tiles to reveal Cloudera Offering details</li>
+                <li>• Match each Offering</li>
+                <li>• Complete all matches within 90 seconds</li>
+                <li>• Once Matched, the Tile turns Orange</li>
               </ul>
             </div>
             <div>

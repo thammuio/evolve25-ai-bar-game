@@ -143,7 +143,7 @@ export const PlayerRegistration: React.FC<PlayerRegistrationProps> = ({ onPlayer
         </form>
 
         <div className="mt-6 text-center text-sm text-slate-500">
-          <p>🎯 Match service names with descriptions</p>
+          <p>🎯 Click tiles to reveal Cloudera Offering details</p>
           <p>⏱️ Complete within 90 seconds for bonus points</p>
           <p>🏆 Compete on the leaderboard</p>
         </div>
