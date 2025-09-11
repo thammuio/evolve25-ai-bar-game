@@ -73,7 +73,7 @@ export const PlayerRegistration: React.FC<PlayerRegistrationProps> = ({ onPlayer
             className="h-10 object-contain mx-auto mb-4"
           />
           <h1 className="text-2xl font-bold text-slate-800 mb-2">
-            Memory Match-up
+            Memory Match-up Game
             </h1>
           
           <p className="text-slate-600">
